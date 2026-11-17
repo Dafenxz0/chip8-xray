@@ -1,0 +1,4 @@
+/target
+web/chip8_xray.wasm
+.DS_Store
+*.swp

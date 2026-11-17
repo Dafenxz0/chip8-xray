@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHIP-8 X-Ray — Live CPU Debugger &amp; Emulator (Rust + WASM)</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CHIP-8</span>
+        <span class="brand-sub">X-RAY DEBUGGER</span>
+        <span id="status-badge" class="badge badge-run">RUNNING</span>
+      </div>
+
+      <div class="controls-bar">
+        <label class="control-group">
+          <span class="label">ROM</span>
+          <select id="rom-select" aria-label="Select built-in ROM">
+            <option value="0">1 · Bounce (Pong Demo)</option>
+            <option value="1">2 · 10PRINT Maze</option>
+            <option value="2">3 · Target Shooter</option>
+          </select>
+        </label>
+
+        <div class="btn-group">
+          <button id="btn-toggle" class="btn btn-primary" title="Space">Pause</button>
+          <button id="btn-step" class="btn" title="N">Step</button>
+          <button id="btn-reset" class="btn" title="R">Reset</button>
+          <button id="btn-sound" class="btn" title="Toggle audio beep">Audio: Off</button>
+        </div>
+
+        <label class="control-group speed-group">
+          <span class="label">Speed</span>
+          <input id="speed-slider" type="range" min="1" max="30" value="10" />
+          <span id="speed-value" class="mono-val">600 Hz</span>
+        </label>
+      </div>
+    </header>
+
+    <div id="wasm-error" class="error-banner" hidden></div>
+
+    <main class="workspace">
+      <section class="col-left">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>64×32 Phosphor Display</h2>
+            <div class="panel-actions">
+              <label class="toggle-inline">
+                <input id="crt-toggle" type="checkbox" checked />
+                <span>CRT Grid</span>
+              </label>
+              <span id="cycle-readout" class="mono-muted">0 cycles</span>
+            </div>
+          </div>
+          <div class="screen-wrap">
+            <canvas id="screen-canvas" width="64" height="32"></canvas>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>4KB RAM Activity Heatmap</h2>
+            <span id="heat-hover" class="mono-muted">Hover cell to inspect</span>
+          </div>
+          <div class="heatmap-layout">
+            <canvas id="heatmap-canvas" width="64" height="64"></canvas>
+            <div class="heatmap-legend">
+              <div class="legend-row"><span class="swatch sw-pc"></span><span>PC Cursor</span></div>
+              <div class="legend-row"><span class="swatch sw-i"></span><span>Index (I)</span></div>
+              <div class="legend-row"><span class="swatch sw-hot"></span><span>Recent Write</span></div>
+              <div class="legend-row"><span class="swatch sw-warm"></span><span>Recent Read / Fetch</span></div>
+              <div class="legend-row"><span class="swatch sw-cold"></span><span>Idle RAM</span></div>
+              <p class="legend-note">
+                64×64 map = 4,096 bytes (`0x000`–`0xFFF`). Fontset lives at `0x050`, ROMs load at `0x200`.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Hex Keypad</h2>
+            <span class="mono-muted">Keys: 1234 / QWER / ASDF / ZXCV or Arrows</span>
+          </div>
+          <div id="keypad-grid" class="keypad-grid"></div>
+        </article>
+      </section>
+
+      <section class="col-right">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>CPU State &amp; Registers</h2>
+            <span id="opcode-readout" class="mono-accent">OP: 0x0000</span>
+          </div>
+
+          <div class="special-regs">
+            <div class="spec-cell"><span>PC</span><strong id="reg-pc">0x200</strong></div>
+            <div class="spec-cell"><span>I</span><strong id="reg-i">0x000</strong></div>
+            <div class="spec-cell"><span>SP</span><strong id="reg-sp">0</strong></div>
+            <div class="spec-cell"><span>DT</span><strong id="reg-dt">0</strong></div>
+            <div class="spec-cell"><span>ST</span><strong id="reg-st">0</strong></div>
+          </div>
+
+          <div id="v-regs-grid" class="v-regs-grid"></div>
+
+          <div class="stack-bar">
+            <span class="stack-label">STACK</span>
+            <span id="stack-readout" class="mono-muted">(empty)</span>
+          </div>
+        </article>
+
+        <article class="panel panel-disasm">
+          <div class="panel-head">
+            <h2>Live Disassembler</h2>
+            <span class="mono-muted">Centered on PC</span>
+          </div>
+          <div id="disasm-feed" class="disasm-feed"></div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Compiled from pure Rust to <code>wasm32-unknown-unknown</code> with zero JS runtime dependencies.</span>
+      <span>Shortcuts: <code>Space</code> Pause/Run · <code>N</code> Step · <code>R</code> Reset · <code>1/2/3</code> Switch ROM</span>
+    </footer>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

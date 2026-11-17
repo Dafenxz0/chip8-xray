@@ -1,0 +1,15 @@
+[package]
+name = "chip8-xray"
+version = "0.1.0"
+edition = "2021"
+description = "CHIP-8 emulator with live CPU X-Ray debugger (registers, RAM heatmap, disassembler) in Terminal TUI & Rust/WASM"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+crossterm = "0.28"
+ratatui = "0.29"
