@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(not(target_arch = "wasm32"))]
 mod app {
-    use std::io::{self, Stdout};
+    use std::io;
     use std::time::{Duration, Instant};
 
     use chip8_xray::cpu::{format_opcode, Cpu, DISPLAY_HEIGHT, DISPLAY_WIDTH, MEMORY_SIZE};
