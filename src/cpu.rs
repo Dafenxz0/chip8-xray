@@ -201,11 +201,9 @@ impl Cpu {
         match opcode & 0xF000 {
             0x0000 => match opcode {
                 0x00E0 => self.display.fill(0),
-                0x00EE => {
-                    if self.sp > 0 {
-                        self.sp -= 1;
-                        self.pc = self.stack[usize::from(self.sp)];
-                    }
+                0x00EE if self.sp > 0 => {
+                    self.sp -= 1;
+                    self.pc = self.stack[usize::from(self.sp)];
                 }
                 _ => {
                     // 0nnn (SYS addr) is a no-op on modern CHIP-8 interpreters.
@@ -302,10 +300,8 @@ impl Cpu {
                         self.pc = self.pc.wrapping_add(2);
                     }
                 }
-                0xA1 => {
-                    if self.keypad[usize::from(self.v[x] & 0x0F)] == 0 {
-                        self.pc = self.pc.wrapping_add(2);
-                    }
+                0xA1 if self.keypad[usize::from(self.v[x] & 0x0F)] == 0 => {
+                    self.pc = self.pc.wrapping_add(2);
                 }
                 _ => {}
             },

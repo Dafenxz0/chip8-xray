@@ -143,10 +143,6 @@ impl RomBuilder {
         self.emit(0xD000 | (u16::from(x) << 8) | (u16::from(y) << 4) | u16::from(n & 0x0F));
     }
 
-    fn skp(&mut self, x: u8) {
-        self.emit(0xE09E | (u16::from(x) << 8));
-    }
-
     fn sknp(&mut self, x: u8) {
         self.emit(0xE0A1 | (u16::from(x) << 8));
     }
