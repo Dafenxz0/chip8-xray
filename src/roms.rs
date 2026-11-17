@@ -341,7 +341,7 @@ fn build_bounce_rom() -> Vec<u8> {
     b.ld_i("bcd_buf");
     b.ld_bcd(0xA);
     b.ld_regs_from_i(2); // V0 = hundreds, V1 = tens, V2 = ones
-    b.ld_reg(3, 2);      // save ones in V3
+    b.ld_reg(3, 2); // save ones in V3
     b.ld_byte(0, 27);
     b.ld_byte(2, 1);
     b.ld_font(1);

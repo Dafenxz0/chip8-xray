@@ -72,7 +72,9 @@ mod app {
             "1" | "bounce" => Ok(RomId::Bounce),
             "2" | "maze" => Ok(RomId::Maze),
             "3" | "shooter" => Ok(RomId::Shooter),
-            _ => Err(format!("unknown ROM '{val}' (expected 1|2|3|bounce|maze|shooter)")),
+            _ => Err(format!(
+                "unknown ROM '{val}' (expected 1|2|3|bounce|maze|shooter)"
+            )),
         }
     }
 
@@ -240,7 +242,8 @@ mod app {
                                 state.cycles_per_tick = (state.cycles_per_tick + 2).min(40);
                             }
                             KeyCode::Char('-') | KeyCode::Char('_') => {
-                                state.cycles_per_tick = state.cycles_per_tick.saturating_sub(2).max(1);
+                                state.cycles_per_tick =
+                                    state.cycles_per_tick.saturating_sub(2).max(1);
                             }
                             // Gamepad bindings for Bounce & Shooter
                             KeyCode::Up | KeyCode::Char('w') | KeyCode::Char('W') => {
@@ -489,10 +492,7 @@ mod app {
             let left = row;
             let right = row + 8;
             lines.push(Line::from(vec![
-                Span::styled(
-                    format!("V{left:X}: "),
-                    Style::default().fg(Color::DarkGray),
-                ),
+                Span::styled(format!("V{left:X}: "), Style::default().fg(Color::DarkGray)),
                 Span::styled(
                     format!("0x{:02X} ({:3})   ", cpu.v[left], cpu.v[left]),
                     if cpu.v[left] != 0 {

@@ -312,8 +312,11 @@ impl Cpu {
             0xF000 => match kk {
                 0x07 => self.v[x] = self.delay_timer,
                 0x0A => {
-                    if let Some((key_idx, _)) =
-                        self.keypad.iter().enumerate().find(|(_, &state)| state != 0)
+                    if let Some((key_idx, _)) = self
+                        .keypad
+                        .iter()
+                        .enumerate()
+                        .find(|(_, &state)| state != 0)
                     {
                         self.v[x] = key_idx as u8;
                     } else {
