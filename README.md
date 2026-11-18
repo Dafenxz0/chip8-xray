@@ -1,70 +1,92 @@
+<p align="center">
+  <img src="assets/readme/hero.svg" alt="chip8-xray — project visual identity" width="100%" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/Dafenxz0/chip8-xray/actions/workflows/ci.yml"><img alt="GitHub Actions CI" src="https://github.com/Dafenxz0/chip8-xray/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="https://dafenxz0.github.io/chip8-xray/"><img alt="Live demo" src="https://img.shields.io/badge/Live_Demo-Open_in_browser-1b3441?style=flat&logo=github" /></a>
+</p>
+
 # chip8-xray
 
-[![CI & GitHub Pages](https://github.com/Dafenxz0/chip8-xray/actions/workflows/ci.yml/badge.svg)](https://github.com/Dafenxz0/chip8-xray/actions/workflows/ci.yml)
+### Play the VM. Inspect the machine.
 
-A complete **CHIP-8 emulator and live CPU X-Ray debugger** written in Rust, shipping both a **Terminal TUI** (`ratatui` + `crossterm`) and a **zero-JS-dependency WebAssembly browser edition** (`wasm32-unknown-unknown`).
+A Rust CHIP-8 emulator with an **X-ray debugger**: watch the framebuffer, registers, disassembly and RAM activity at the same time. Run it as a terminal TUI or in your browser through WebAssembly.
 
-**Live Web Demo:** <https://dafenxz0.github.io/chip8-xray/>
+<p align="center"><a href="https://dafenxz0.github.io/chip8-xray/"><strong>OPEN THE WEB EMULATOR</strong></a></p>
 
-## Features
+![CHIP-8 CPU and debugger architecture](assets/readme/architecture.svg)
 
-- **Pure-Rust CHIP-8 VM (`src/cpu.rs`)**: Zero OS dependencies, implements all 35 classic opcodes, 4 KB RAM, `V0..VF`, `I`, `PC`, `SP`, 16-level stack, delay/sound timers, 64×32 monochrome framebuffer, 16-key hex keypad, deterministic xorshift PRNG, instruction disassembler (`format_opcode(u16) -> String`), and a per-byte **RAM Activity Heatmap** (`heat[4096]`).
-- **Built-in Original Mini-ROMs (`src/roms.rs`)**: Assembled in pure Rust via a 2-pass label builder (no copyrighted ROMs needed):
-  1. **Bounce (Pong Demo)** — Bouncing ball, interactive/auto-tracking paddles, BCD score HUD (`Fx33` + `Fx29`), sound trigger.
-  2. **10PRINT Maze** — Procedural diagonal maze generator exercising `RND`, `CALL`/`RET`, `DRW`, and delay timer pacing.
-  3. **Target Shooter** — Moving ship, drifting targets, projectile collision detection (`VF`), and live BCD score counter.
-- **Terminal X-Ray TUI (`src/main.rs`)**: Split-pane dashboard with Unicode half-block (`▀`) 64×32 display, live `V0..VF` & stack inspector, PC-centered disassembler, 4 KB RAM heatmap, and `--headless --cycles N` CLI verification mode.
-- **Browser WASM Edition (`web/`)**: Compiles the exact same Rust VM to `chip8_xray.wasm` with shared linear memory telemetry, interactive 64×64 RAM heatmap inspector, clickable/keyboard hex keypad, CRT grid toggle, and optional Web Audio square-wave beep.
+## What's under the hood?
 
-## Keybindings
-
-### Terminal TUI
-| Key | Action |
+| Element | Implementation |
 | --- | --- |
-| `Space` | Pause / Resume |
-| `N` | Step single CPU cycle |
-| `R` | Reset current ROM |
-| `1` / `2` / `3` | Switch built-in ROM (Bounce / Maze / Shooter) |
-| `+` / `-` | Adjust execution speed (`cycles/tick`) |
-| `W` / `S` / `Up` / `Down` | Keypad `0x1` / `0x4` (Bounce paddle) |
-| `A` / `D` / `Left` / `Right` | Keypad `0x7` / `0x9` (Shooter move) |
-| `F` / `Enter` | Keypad `0x5` (Shooter fire) |
-| `Q` / `Esc` | Quit |
+| 4 KB RAM / 16-level stack | One pure-Rust VM core |
+| 64 × 32 monochrome display | Shared framebuffer exposed to both UIs |
+| 35 classic CHIP-8 opcodes | Fetch/decode/execute and disassembler |
+| 16-key hexadecimal keypad | Browser and terminal keyboard mappings |
+| Delay + sound timers | Timed VM state |
+| Per-byte RAM heat | 4096-element activity tracking buffer |
 
-### Browser WASM UI
-- `Space` Pause/Resume, `N` Step, `R` Reset, `1`/`2`/`3` Switch ROM.
-- Hex keypad mapped to `1234` / `QWER` / `ASDF` / `ZXCV` plus `Arrow` keys and clickable on-screen buttons.
+Three original ROMs are bundled and assembled directly in Rust: **Bounce**, **10PRINT Maze**, and **Target Shooter**. No third-party ROM downloads are required to try the emulator.
 
-## Quick Start
+## Run in your terminal
 
 ```bash
-# Run Terminal X-Ray TUI
+git clone https://github.com/Dafenxz0/chip8-xray.git
+cd chip8-xray
 cargo run --release
+```
 
-# Run headless verification (500 cycles)
+Run headlessly to exercise the VM without the terminal interface:
+
+```bash
 cargo run -- --headless --cycles 500
-
-# Run unit tests
 cargo test
+```
 
-# Build WebAssembly module and serve locally
+### Terminal controls
+
+| Key | What it does |
+| --- | --- |
+| `Space` | Pause / run |
+| `N` | Step one CPU cycle |
+| `R` | Reset selected ROM |
+| `1` / `2` / `3` | Bounce / Maze / Shooter |
+| `+` / `-` | Change cycles per tick |
+| `W` / `S` or `↑` / `↓` | Bounce paddle input |
+| `A` / `D` or `←` / `→` | Shooter move |
+| `F` / `Enter` | Shooter fire |
+| `Q` / `Esc` | Quit TUI |
+
+## Run the browser build
+
+**[Try the live browser emulator →](https://dafenxz0.github.io/chip8-xray/)**
+
+Or compile the same Rust VM for `wasm32`:
+
+```bash
 rustup target add wasm32-unknown-unknown
 cargo build --lib --target wasm32-unknown-unknown --release
 cp target/wasm32-unknown-unknown/release/chip8_xray.wasm web/chip8_xray.wasm
 python3 -m http.server 8080 --directory web
 ```
 
-## Architecture
+Open `http://localhost:8080`. The browser edition has a clickable hex keypad, CRT overlay and a **64 × 64 memory heatmap**, in addition to the register and disassembly inspector.
 
-```text
-src/
-├── cpu.rs    # Pure-Rust CHIP-8 VM, 35 opcodes, disassembler, RAM heat tracker, unit tests
-├── roms.rs   # 2-pass Rust assembler + 3 original built-in ROMs + determinism tests
-├── wasm.rs   # Safe #[no_mangle] extern "C" FFI bridge for wasm32-unknown-unknown
-├── lib.rs    # Library root (cdylib + rlib)
-└── main.rs   # Terminal X-Ray TUI (ratatui + crossterm) & --headless CLI runner
-web/
-├── index.html
-├── style.css
-└── app.js    # Zero-dependency WebAssembly loader, canvases, keypad & disassembler UI
+## Debugger data flow
+
+The VM in [`src/cpu.rs`](src/cpu.rs) exposes execution state. [`src/roms.rs`](src/roms.rs) contains the two-pass ROM builder and built-in programs, while [`src/wasm.rs`](src/wasm.rs) exports shared memory to the browser frontend. [`src/main.rs`](src/main.rs) provides the Ratatui/Crossterm terminal UI.
+
+The artwork above is a conceptual debugger plate rather than a screenshot. The disassembler strings shown there are illustrative.
+
+## Test it
+
+```bash
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings
+cargo test
+cargo run -- --headless --cycles 500
 ```
+
+This project aims at **classic CHIP-8 behavior**, not every historical CHIP-8 variant or Super-CHIP extension.
